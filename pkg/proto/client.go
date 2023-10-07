@@ -113,9 +113,9 @@ func pad(text []byte) []byte {
 
 func unpad(text []byte) ([]byte, error) {
 	padding := text[len(text)-1]
-	if len(text)-int(padding) >= len(text) {
+	if len(text)-int(padding) < 0 || len(text)-int(padding) >= len(text) {
 		return nil,
-			fmt.Errorf("padding length %q larger than text length %q", len(text)-int(padding), len(text))
+			fmt.Errorf("padding index %q bad for text length %q", len(text)-int(padding), len(text))
 	}
 	return text[:len(text)-int(padding)], nil
 }
