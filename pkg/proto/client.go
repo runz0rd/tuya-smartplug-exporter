@@ -20,9 +20,11 @@ import (
 	"crypto/aes"
 	"encoding/binary"
 	"encoding/json"
-	"github.com/pkg/errors"
+	"fmt"
 	"hash/crc32"
 	"net"
+
+	"github.com/pkg/errors"
 )
 
 var (
@@ -67,7 +69,11 @@ func (p *proto) Status() (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(unpad(data), &resp)
+	ud, err := unpad(data)
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(ud, &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -105,9 +111,13 @@ func pad(text []byte) []byte {
 	return text
 }
 
-func unpad(text []byte) []byte {
+func unpad(text []byte) ([]byte, error) {
 	padding := text[len(text)-1]
-	return text[:len(text)-int(padding)]
+	if len(text)-int(padding) >= len(text) {
+		return nil,
+			fmt.Errorf("padding length %q larger than text length %q", len(text)-int(padding), len(text))
+	}
+	return text[:len(text)-int(padding)], nil
 }
 
 func (p *proto) encryptRequest() ([]byte, error) {

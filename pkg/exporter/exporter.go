@@ -17,12 +17,13 @@ limitations under the License.
 package exporter
 
 import (
+	"time"
+
 	"github.com/go-kit/log"
 	"github.com/go-kit/log/level"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/rkosegi/tuya-smartplug-exporter/pkg/proto"
 	"github.com/rkosegi/tuya-smartplug-exporter/pkg/types"
-	"time"
 )
 
 type exporter struct {
@@ -52,7 +53,7 @@ func (e *exporter) Collect(c chan<- prometheus.Metric) {
 		client := proto.NewClient(dev.Ip, dev.Id, []byte(dev.Key))
 		status, err := client.Status()
 		if err != nil {
-			level.Warn(e.l).Log("msg", "error during scrape", "device", dev.Name, "error", err)
+			level.Warn(e.l).Log("msg", "error during status scrape", "device", dev.Name, "error", err)
 			e.m.ScrapeErrors.With(labels).Inc()
 			e.m.Error.Set(1)
 		} else {
