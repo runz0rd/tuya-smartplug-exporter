@@ -20,7 +20,6 @@ import (
 	"crypto/aes"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"hash/crc32"
 	"net"
 
@@ -69,11 +68,7 @@ func (p *proto) Status() (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	ud, err := unpad(data)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(ud, &resp)
+	err = json.Unmarshal(unpad(data), &resp)
 	if err != nil {
 		return nil, err
 	}
@@ -111,13 +106,9 @@ func pad(text []byte) []byte {
 	return text
 }
 
-func unpad(text []byte) ([]byte, error) {
+func unpad(text []byte) []byte {
 	padding := text[len(text)-1]
-	if len(text)-int(padding) < 0 || len(text)-int(padding) >= len(text) {
-		return nil,
-			fmt.Errorf("padding index %q bad for text length %q", len(text)-int(padding), len(text))
-	}
-	return text[:len(text)-int(padding)], nil
+	return text[:len(text)-int(padding)]
 }
 
 func (p *proto) encryptRequest() ([]byte, error) {
